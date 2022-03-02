@@ -1,5 +1,5 @@
 import axios from 'axios'
-
+import { Message } from 'element-ui'
 let service = axios.create({
     baseURL: process.env.VUE_APP_URL,
     timeout: 60000
@@ -9,6 +9,8 @@ let service = axios.create({
 service.interceptors.request.use(
     config => {
         //此处添加请求token
+        let token = localStorage.getItem("token");
+        if (token) config.headers['X-Token'] = token;
         return config
     },
     error => {
@@ -21,7 +23,11 @@ service.interceptors.request.use(
 service.interceptors.response.use(
     response => {
         //处理不同状态码
-        return response
+        if (response.data.code === 0) {
+            Message.error(response.data.message);
+            return;
+        }
+        return response.data;
     },
     error => {
         console.log(error)
